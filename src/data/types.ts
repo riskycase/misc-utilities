@@ -1,9 +1,44 @@
-export interface TransformerOptions {
+interface TransformerOptionSelect {
   name: string;
   displayName: string;
-  type: "string" | "number" | "boolean";
-  default: string | number | boolean;
+  type: "select";
+  default: string;
+  options: Array<{
+    displayName: string;
+    value: string;
+  }>;
+  tip?: string;
 }
+
+interface TransformerOptionString {
+  name: string;
+  displayName: string;
+  type: "string";
+  default: string;
+  tip?: string;
+}
+interface TransformerOptionNumber {
+  name: string;
+  displayName: string;
+  type: "number";
+  default: number;
+  max: number;
+  min: number;
+  tip?: string;
+}
+interface TransformerOptionBoolean {
+  name: string;
+  displayName: string;
+  type: "boolean";
+  default: boolean;
+  tip?: string;
+}
+
+export type TransformerOptions =
+  | TransformerOptionBoolean
+  | TransformerOptionNumber
+  | TransformerOptionSelect
+  | TransformerOptionString;
 
 export enum TransformDataType {
   STRING,

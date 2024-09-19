@@ -3,21 +3,18 @@
 import { transformations } from "@/data/transformations";
 import { TransformerInnerClass } from "@/data/types";
 import {
-  Box,
   Button,
   Flex,
   Heading,
-  IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
-  Text,
   Textarea,
   theme,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { MdDelete, MdEdit } from "react-icons/md";
+import TransformerLayer from "./transformerLayer";
 
 export default function Transformer() {
   const [input, setInput] = useState("");
@@ -83,34 +80,12 @@ export default function Transformer() {
             </MenuList>
           </Menu>
           {transformers.map((transformer, index) => (
-            <Box
+            <TransformerLayer
               key={index}
-              paddingY={2}
-              paddingX={4}
-              border="white"
-              borderWidth="thin"
-              borderStyle="solid"
-              borderRadius={4}
-            >
-              <Flex justifyContent="space-between" alignItems="center">
-                <Text size="large">{transformer.name}</Text>
-                <Flex alignItems="center">
-                  {transformer.options.length > 0 && (
-                    <IconButton
-                      variant="text"
-                      icon={<MdEdit />}
-                      aria-label="Configure layer"
-                    />
-                  )}
-                  <IconButton
-                    variant="text"
-                    icon={<MdDelete />}
-                    aria-label="Delete layer"
-                    onClick={() => deleteTransformer(index)}
-                  />
-                </Flex>
-              </Flex>
-            </Box>
+              transformer={transformer}
+              deleteFunction={() => deleteTransformer(index)}
+              updateFunction={() => computeOutput(input, transformers)}
+            />
           ))}
         </Flex>
       </Flex>
