@@ -52,8 +52,19 @@ export default function Transformer() {
     }
 
     return (
-        <Flex direction="row" alignItems="stretch" padding={2} gap={2} flex={1}>
-            <Flex direction="column" alignItems="stretch" gap={2} flex={3}>
+        <Flex
+            direction={{ base: "column-reverse", md: "row" }}
+            alignItems="stretch"
+            padding={2}
+            gap={2}
+            flex={1}
+        >
+            <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={2}
+                flex={3}
+                >
                 <Textarea
                     flex={1}
                     value={input}
@@ -62,11 +73,27 @@ export default function Transformer() {
                         setInput(e.target.value);
                         computeOutput(e.target.value, transformers);
                     }}
+                    minHeight={"35vh"}
                 />
-                <Textarea flex={1} value={output} readOnly resize="none" />
+                <Textarea
+                    flex={1}
+                    value={output}
+                    readOnly
+                    resize="none"
+                    minHeight={"35vh"}
+                />
             </Flex>
             <Flex direction="column" alignItems="stretch" gap={2} flex={1}>
-                <Flex direction="row" alignSelf="stretch" gap={2}>
+                <Flex
+                    direction="row"
+                    alignSelf="stretch"
+                    gap={2}
+                    top={0}
+                    position="sticky"
+                    backgroundColor={theme.colors.gray[900]}
+                    zIndex={5}
+                    paddingY={2}
+                >
                     <Button
                         onClick={() => {
                             setInput("");
@@ -97,7 +124,7 @@ export default function Transformer() {
                             onCopy();
                             toast({
                                 title: "Output copied to clipboard",
-                                status: "success"
+                                status: "success",
                             });
                         }}
                         flex={1}
