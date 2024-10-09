@@ -1,7 +1,7 @@
 "use client";
 
-import { transformations } from "@/data/transformations";
-import { TransformerInnerClass } from "@/data/types";
+import { transformations } from "@/data/transformer/transformations";
+import { TransformerInnerClass } from "@/data/transformer/types";
 import {
     Button,
     Flex,

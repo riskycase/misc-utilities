@@ -1,4 +1,4 @@
-import { TransformerInnerClass } from "@/data/types";
+import { TransformerInnerClass } from "@/data/transformer/types";
 import {
   Box,
   Checkbox,
