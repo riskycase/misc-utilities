@@ -1,3 +1,4 @@
+import Hash from "./hash/hash";
 import Transformer from "./transformer/transformer";
 
 interface App {
@@ -15,4 +16,10 @@ export const apps: App[] = [
             "Transform text through different data types, parsers and formatters",
         element: Transformer
     },
+    {
+        displayName: "Hash tools",
+        identifier: "hash",
+        description: "Generate and verify hashes for text using different HMAC algorithms",
+        element: Hash
+    }
 ];
