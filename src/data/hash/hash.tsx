@@ -48,6 +48,7 @@ export default function Hash() {
         mode: HashInputMode,
         hasher: HasherInnerClass
     ) {
+        setOutput("Calculating hash...")
         hasher.hash(mode === "text" ? input : file).then((output) => {
             setOutput(output);
             setValue(output);
