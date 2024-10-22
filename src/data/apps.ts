@@ -19,7 +19,7 @@ export const apps: App[] = [
     {
         displayName: "Hash tools",
         identifier: "hash",
-        description: "Generate and verify hashes for text using different HMAC algorithms",
+        description: "Generate hashes for text or files using different HMAC algorithms",
         element: Hash
     }
 ];

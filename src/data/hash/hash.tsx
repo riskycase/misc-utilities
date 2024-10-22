@@ -6,6 +6,8 @@ import {
     FormControl,
     FormHelperText,
     FormLabel,
+    IconButton,
+    Input,
     Link,
     Menu,
     MenuButton,
@@ -22,25 +24,38 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { hashers } from "./hashers";
-import { HasherInnerClass } from "./types";
+import {
+    HASH_FILE_INPUT_ID,
+    HasherInnerClass,
+    HashInputMode,
+    MaybeFile,
+} from "./types";
 import NextLink from "next/link";
+import { MdUploadFile } from "react-icons/md";
 
 export default function Hash() {
     const [input, setInput] = useState("");
     const [output, setOutput] = useState("");
     const [hasher, setHasher] = useState(hashers[0].inner);
+    const [mode, setMode] = useState<HashInputMode>("text");
+    const [file, setFile] = useState<MaybeFile>(null);
     const { onCopy, setValue } = useClipboard("");
     const toast = useToast();
 
-    function calculateHash(input: string, hasher: HasherInnerClass) {
-        hasher.hash(input).then((output) => {
+    function calculateHash(
+        input: string,
+        file: MaybeFile,
+        mode: HashInputMode,
+        hasher: HasherInnerClass
+    ) {
+        hasher.hash(mode === "text" ? input : file).then((output) => {
             setOutput(output);
             setValue(output);
         });
     }
 
     // Calculate the first hash
-    useEffect(() => calculateHash(input, hasher), []);
+    useEffect(() => calculateHash(input, null, "text", hasher), []);
 
     return (
         <Flex
@@ -51,18 +66,78 @@ export default function Hash() {
             flex={1}
         >
             <Flex direction="column" alignItems="stretch" gap={2} flex={3}>
-                <FormControl flex={1}>
-                    <FormLabel>Input text</FormLabel>
+                <FormControl flex={mode === "text" ? 1 : undefined}>
+                    <Flex
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="space-between"
+                    >
+                        <FormLabel>Input</FormLabel>
+                        <Flex direction="row" alignItems="center">
+                            {file && (
+                                <Text as="i" fontSize="small">
+                                    {file.name}
+                                </Text>
+                            )}
+                            <Button
+                                as="label"
+                                htmlFor={HASH_FILE_INPUT_ID}
+                                variant="ghost"
+                                colorScheme="white"
+                                aria-label="select-file"
+                                rightIcon={<MdUploadFile />}
+                            >
+                                Choose file
+                            </Button>
+                        </Flex>
+                    </Flex>
                     <Textarea
                         value={input}
                         resize="none"
                         onChange={(e) => {
                             setInput(e.target.value);
-                            calculateHash(e.target.value, hasher);
+                            setFile(null);
+                            calculateHash(e.target.value, null, "text", hasher);
+                        }}
+                        onFocus={() => {
+                            if (mode === "file") {
+                                setMode("text");
+                                setFile(null);
+                                (
+                                    document.getElementById(
+                                        HASH_FILE_INPUT_ID
+                                    ) as HTMLInputElement
+                                ).value = "";
+                                setInput("");
+                                calculateHash("", null, "text", hasher);
+                                setFile(null);
+                            }
                         }}
                         minHeight={"35vh"}
                     />
                 </FormControl>
+                <Input
+                    type="file"
+                    id={HASH_FILE_INPUT_ID}
+                    display="none"
+                    onChange={(e) => {
+                        if (file !== e.target.files!.item(0)) {
+                            const file = e.target.files!.item(0);
+                            setFile(file);
+                            setMode("file");
+                            setInput(
+                                `File selected. Click here to go back to raw text hash`
+                            );
+                            calculateHash(input, file, "file", hasher);
+                        } else {
+                            setMode("text");
+                            setFile(null);
+                            setInput("");
+                            calculateHash("", null, "text", hasher);
+                            setFile(null);
+                        }
+                    }}
+                />
                 <FormControl flex={1}>
                     <FormLabel>{hasher.name} hash</FormLabel>
                     <Textarea
@@ -86,8 +161,10 @@ export default function Hash() {
                 >
                     <Button
                         onClick={() => {
+                            setMode("text");
                             setInput("");
-                            calculateHash("", hasher);
+                            calculateHash("", null, "text", hasher);
+                            setFile(null);
                             toast({
                                 title: "Input cleared",
                             });
@@ -118,7 +195,7 @@ export default function Hash() {
                                 onClick={() => {
                                     const inner = hasher.inner();
                                     setHasher(inner);
-                                    calculateHash(input, inner);
+                                    calculateHash(input, file, mode, inner);
                                 }}
                                 color={theme.colors.gray[700]}
                             >
@@ -153,7 +230,12 @@ export default function Hash() {
                                     onChange={(_, value) => {
                                         if (!Number.isNaN(value))
                                             hasher.config[option.name] = value;
-                                        calculateHash(input, hasher);
+                                        calculateHash(
+                                            input,
+                                            file,
+                                            mode,
+                                            hasher
+                                        );
                                     }}
                                 >
                                     <NumberInputField />
@@ -178,7 +260,12 @@ export default function Hash() {
                                     onChange={(e) => {
                                         hasher.config[option.name] =
                                             e.target.value;
-                                        calculateHash(input, hasher);
+                                        calculateHash(
+                                            input,
+                                            file,
+                                            mode,
+                                            hasher
+                                        );
                                     }}
                                     color={theme.colors.gray[700]}
                                     backgroundColor={theme.colors.gray[50]}
