@@ -4,18 +4,15 @@ import {
     Button,
     Flex,
     FormControl,
+    FormErrorMessage,
     FormHelperText,
     FormLabel,
-    IconButton,
     Input,
     Link,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuList,
     NumberInput,
     NumberInputField,
     Select,
+    Switch,
     Text,
     Textarea,
     theme,
@@ -35,10 +32,12 @@ import { MdUploadFile } from "react-icons/md";
 
 export default function Hash() {
     const [input, setInput] = useState("");
-    const [output, setOutput] = useState("");
+    const [output, setOutput] = useState<string | null>("");
     const [hasher, setHasher] = useState(hashers[0].inner);
     const [mode, setMode] = useState<HashInputMode>("text");
     const [file, setFile] = useState<MaybeFile>(null);
+    const [checkHash, setCheckHash] = useState<string | null>(null);
+
     const { onCopy, setValue } = useClipboard("");
     const toast = useToast();
 
@@ -48,7 +47,7 @@ export default function Hash() {
         mode: HashInputMode,
         hasher: HasherInnerClass
     ) {
-        setOutput("Calculating hash...")
+        setOutput(null);
         hasher.hash(mode === "text" ? input : file).then((output) => {
             setOutput(output);
             setValue(output);
@@ -139,14 +138,61 @@ export default function Hash() {
                         }
                     }}
                 />
-                <FormControl flex={1}>
-                    <FormLabel>{hasher.name} hash</FormLabel>
+                <FormControl
+                    flex={1}
+                    isInvalid={
+                        checkHash !== null &&
+                        output !== null &&
+                        checkHash.toLowerCase() !== output.toLowerCase()
+                    }
+                >
+                    <Flex
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="space-between"
+                    >
+                        <FormLabel>
+                            {`${checkHash !== null ? "Verify " : ""}${
+                                hasher.name
+                            } `}
+                            hash
+                        </FormLabel>
+                        <Flex direction="row" alignItems="center">
+                            <FormControl display="flex" alignItems="center">
+                                <FormLabel>Verify mode</FormLabel>
+                                <Switch
+                                    isChecked={checkHash !== null}
+                                    onChange={() =>
+                                        setCheckHash(
+                                            checkHash === null
+                                                ? ""
+                                                : null
+                                        )
+                                    }
+                                />
+                            </FormControl>
+                        </Flex>
+                    </Flex>
                     <Textarea
-                        value={output}
-                        readOnly
+                        value={
+                            checkHash === null
+                                ? output || "Calculating hash"
+                                : checkHash
+                        }
+                        readOnly={checkHash === null}
+                        onChange={(e) => setCheckHash(e.target.value)}
                         resize="none"
                         minHeight={"35vh"}
                     />
+                    {checkHash !== null &&
+                        output !== null &&
+                        (checkHash.toLowerCase() === output.toLowerCase() ? (
+                            <FormHelperText>Hashes match!</FormHelperText>
+                        ) : (
+                            <FormErrorMessage>
+                                Hashes do not match!
+                            </FormErrorMessage>
+                        ))}
                 </FormControl>
             </Flex>
             <Flex direction="column" alignItems="stretch" gap={2} flex={1}>
@@ -187,34 +233,40 @@ export default function Hash() {
                         Copy output
                     </Button>
                 </Flex>
-                <Menu matchWidth>
-                    <MenuButton as={Button}>Change HMAC</MenuButton>
-                    <MenuList maxHeight="50vh" overflowY="auto">
-                        {hashers.map((hasher, index) => (
-                            <MenuItem
-                                key={index}
-                                onClick={() => {
-                                    const inner = hasher.inner();
-                                    setHasher(inner);
-                                    calculateHash(input, file, mode, inner);
-                                }}
-                                color={theme.colors.gray[700]}
-                            >
-                                {hasher.name}
-                            </MenuItem>
-                        ))}
-                    </MenuList>
-                </Menu>
-                <Text as="i" fontSize="small" alignSelf="center">
-                    Hashes implemented by{" "}
-                    <Link
-                        as={NextLink}
-                        href="https://www.npmjs.com/package/hash-wasm"
+                <FormControl>
+                    <FormLabel>Hashing algorithm</FormLabel>
+                    <Select
+                        value={hasher.name}
+                        onChange={(e) =>
+                            setHasher(
+                                hashers
+                                    .find(
+                                        (hasher) =>
+                                            hasher.name === e.target.value
+                                    )!!
+                                    .inner()
+                            )
+                        }
+                        color={theme.colors.gray[700]}
+                        backgroundColor={theme.colors.gray[50]}
                     >
-                        hash-wasm
-                    </Link>{" "}
-                    npm module
-                </Text>
+                        {hashers.map((hasher, index) => (
+                            <option value={hasher.name} key={index}>
+                                {hasher.name}
+                            </option>
+                        ))}
+                    </Select>
+                    <FormHelperText color={theme.colors.gray[50]}>
+                        Hashes implemented by{" "}
+                        <Link
+                            as={NextLink}
+                            href="https://www.npmjs.com/package/hash-wasm"
+                        >
+                            hash-wasm
+                        </Link>{" "}
+                        npm module
+                    </FormHelperText>
+                </FormControl>
                 {hasher.options.map((option, index) => {
                     if (option.type === "number")
                         return (
