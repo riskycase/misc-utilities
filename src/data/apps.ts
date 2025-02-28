@@ -2,6 +2,7 @@ import Hash from "./hash/hash";
 import Number from "./random/number";
 import Text from "./random/text";
 import Transformer from "./transformer/transformer";
+import UnixTime from "./unixTime/unixTime";
 
 interface App {
   displayName: string;
@@ -36,5 +37,11 @@ export const apps: App[] = [
     identifier: "rtp",
     description: "Select a random item from a set of strings (Or flip a coin)",
     element: Text,
+  },
+  {
+    displayName: "Unix Time Utils",
+    identifier: "unixTime",
+    description: "Manipulate and work with unix/epoch timestamps",
+    element: UnixTime,
   },
 ];
