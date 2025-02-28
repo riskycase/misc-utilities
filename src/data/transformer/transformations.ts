@@ -11,6 +11,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "URL Encode";
+        identifier = "urlEncode"
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -23,6 +24,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "URL Decode";
+        identifier = "urlDecode"
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -35,6 +37,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "JSON Parse";
+        identifier = "jsonParse"
         input = TransformDataType.STRING;
         output = TransformDataType.OBJECT;
         transform(input: any) {
@@ -47,6 +50,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "JSON Stringify/Minify";
+        identifier = "jsonStringify"
         input = TransformDataType.OBJECT;
         output = TransformDataType.STRING;
         override options: TransformerOptions[] = [
@@ -74,6 +78,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Base64 Encode";
+        identifier = "base64Encode"
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -90,6 +95,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Base64 Decode";
+        identifier = "base64Decode"
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -104,6 +110,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Stringify number";
+        identifier = "numberStringify"
         input = TransformDataType.NUMBER;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -116,6 +123,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Parse and scale number";
+        identifier = "numberParse"
         input = TransformDataType.STRING;
         output = TransformDataType.NUMBER;
         override options: TransformerOptions[] = [
@@ -151,6 +159,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Modify string";
+        identifier = "stringManipulate"
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         override options: TransformerOptions[] = [

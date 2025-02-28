@@ -1,7 +1,10 @@
 "use client";
 
 import { transformations } from "@/data/transformer/transformations";
-import { TransformerInnerClass } from "@/data/transformer/types";
+import {
+  TransformDataType,
+  TransformerInnerClass,
+} from "@/data/transformer/types";
 import {
   Button,
   Flex,
@@ -44,13 +47,18 @@ export default function Transformer() {
     input: string,
     transformers: Array<TransformerInnerClass>
   ) {
-    const output = transformers.reduce((prev, transformer) => {
+    let output = transformers.reduce((prev, transformer) => {
       try {
         return transformer.transform(prev);
       } catch (e) {
         return prev;
       }
     }, input);
+    if (transformers.reverse()[0]?.output == TransformDataType.OBJECT) {
+      output = JSON.stringify(output, null, 4);
+    } else if (transformers.reverse()[0]?.output == TransformDataType.OBJECT) {
+      output = Number(output).toLocaleString();
+    }
     setOutput(output);
     setValue(output);
   }

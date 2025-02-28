@@ -50,6 +50,7 @@ export abstract class TransformerInnerClass {
   options: Array<TransformerOptions> = [];
   config: any = {};
   name: string = "";
+  abstract identifier: string;
   abstract transform(input: any): any;
   abstract input: TransformDataType;
   abstract output: TransformDataType;
