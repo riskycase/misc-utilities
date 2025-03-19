@@ -5,13 +5,17 @@ import {
   TransformerOptions,
 } from "./types";
 
+function getOrDefault<T>(value: T, defaultValue: T) {
+  return value === undefined ? defaultValue : value;
+}
+
 export const transformations: Array<Transformer> = [
   {
     name: "URL Encode",
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "URL Encode";
-        identifier = "urlEncode"
+        identifier = "urlEncode";
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -24,7 +28,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "URL Decode";
-        identifier = "urlDecode"
+        identifier = "urlDecode";
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -37,7 +41,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "JSON Parse";
-        identifier = "jsonParse"
+        identifier = "jsonParse";
         input = TransformDataType.STRING;
         output = TransformDataType.OBJECT;
         transform(input: any) {
@@ -50,7 +54,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "JSON Stringify/Minify";
-        identifier = "jsonStringify"
+        identifier = "jsonStringify";
         input = TransformDataType.OBJECT;
         output = TransformDataType.STRING;
         override options: TransformerOptions[] = [
@@ -68,7 +72,7 @@ export const transformations: Array<Transformer> = [
           return JSON.stringify(
             input,
             null,
-            this.config.padding === undefined ? 4 : this.config.padding
+            getOrDefault(this.config.padding, 4)
           );
         }
       })(),
@@ -78,7 +82,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Base64 Encode";
-        identifier = "base64Encode"
+        identifier = "base64Encode";
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -95,7 +99,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Base64 Decode";
-        identifier = "base64Decode"
+        identifier = "base64Decode";
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -110,7 +114,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Stringify number";
-        identifier = "numberStringify"
+        identifier = "numberStringify";
         input = TransformDataType.NUMBER;
         output = TransformDataType.STRING;
         transform(input: any) {
@@ -123,7 +127,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Parse and scale number";
-        identifier = "numberParse"
+        identifier = "numberParse";
         input = TransformDataType.STRING;
         output = TransformDataType.NUMBER;
         override options: TransformerOptions[] = [
@@ -147,9 +151,68 @@ export const transformations: Array<Transformer> = [
         ];
         transform(input: any) {
           return (
-            Number(input) *
-              (this.config.scale === undefined ? 1 : this.config.scale) +
-            (this.config.shift === undefined ? 0 : this.config.shift)
+            Number(input) * getOrDefault(this.config.scale, 1) +
+            getOrDefault(this.config.shift, 0)
+          );
+        }
+      })(),
+  },
+  {
+    name: "Replace String (As Is)",
+    inner: () =>
+      new (class extends TransformerInnerClass {
+        name = "Replace String (As Is)";
+        identifier = "stringReplace";
+        input = TransformDataType.STRING;
+        output = TransformDataType.STRING;
+        override options: TransformerOptions[] = [
+          {
+            name: "oldString",
+            type: "string",
+            displayName: "Old String",
+            default: "",
+          },
+          {
+            name: "newString",
+            type: "string",
+            displayName: "New String",
+            default: "",
+          },
+        ];
+        transform(input: any) {
+          return String(input).replaceAll(
+            getOrDefault(this.config.oldString, ""),
+            getOrDefault(this.config.newString, "")
+          );
+        }
+      })(),
+  },
+  {
+    name: "Replace String (RegEx)",
+    inner: () =>
+      new (class extends TransformerInnerClass {
+        name = "Replace String (RegEx)";
+        identifier = "stringReplace";
+        input = TransformDataType.STRING;
+        output = TransformDataType.STRING;
+        override options: TransformerOptions[] = [
+          {
+            name: "regex",
+            type: "string",
+            displayName: "RegEx",
+            default: "",
+          },
+          {
+            name: "newString",
+            type: "string",
+            displayName: "New String",
+            default: "",
+          },
+        ];
+        transform(input: any) {
+          return String(input).replaceAll(
+            RegExp(getOrDefault(this.config.regex, ""), "g"),
+            getOrDefault(this.config.newString, "")
           );
         }
       })(),
@@ -159,7 +222,7 @@ export const transformations: Array<Transformer> = [
     inner: () =>
       new (class extends TransformerInnerClass {
         name = "Modify string";
-        identifier = "stringManipulate"
+        identifier = "stringManipulate";
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         override options: TransformerOptions[] = [
@@ -217,8 +280,7 @@ export const transformations: Array<Transformer> = [
           },
         ];
         transform(input: any) {
-          const targetCase =
-            this.config.case === undefined ? "none" : this.config.case;
+          const targetCase = getOrDefault(this.config.case, "none");
           let output = input;
           switch (targetCase) {
             case "upper":
@@ -261,11 +323,10 @@ export const transformations: Array<Transformer> = [
               break;
           }
           if (this.config.trim) output = output.trim();
-          output = `${
-            this.config.prefix === undefined ? "" : this.config.prefix
-          }${output}${
-            this.config.suffix === undefined ? "" : this.config.suffix
-          }`;
+          output = `${getOrDefault(
+            this.config.prefix,
+            ""
+          )}${output}${getOrDefault(this.config.suffix, "")}`;
           return output;
         }
       })(),

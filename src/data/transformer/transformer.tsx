@@ -56,7 +56,7 @@ export default function Transformer() {
     }, input);
     if (transformers.reverse()[0]?.output == TransformDataType.OBJECT) {
       output = JSON.stringify(output, null, 4);
-    } else if (transformers.reverse()[0]?.output == TransformDataType.OBJECT) {
+    } else if (transformers.reverse()[0]?.output == TransformDataType.NUMBER) {
       output = Number(output).toLocaleString();
     }
     setOutput(output);
