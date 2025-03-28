@@ -1,3 +1,4 @@
+import { base64Decode, base64Encode, getOrDefault } from "@/util";
 import {
   TransformDataType,
   Transformer,
@@ -5,14 +6,10 @@ import {
   TransformerOptions,
 } from "./types";
 
-function getOrDefault<T>(value: T, defaultValue: T) {
-  return value === undefined ? defaultValue : value;
-}
-
 export const transformations: Array<Transformer> = [
   {
     name: "URL Encode",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "URL Encode";
         identifier = "urlEncode";
@@ -21,11 +18,11 @@ export const transformations: Array<Transformer> = [
         transform(input: any) {
           return encodeURIComponent(input);
         }
-      })(),
+      })(config),
   },
   {
     name: "URL Decode",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "URL Decode";
         identifier = "urlDecode";
@@ -34,11 +31,11 @@ export const transformations: Array<Transformer> = [
         transform(input: any) {
           return decodeURIComponent(input);
         }
-      })(),
+      })(config),
   },
   {
     name: "JSON Parse",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "JSON Parse";
         identifier = "jsonParse";
@@ -47,11 +44,11 @@ export const transformations: Array<Transformer> = [
         transform(input: any) {
           return JSON.parse(input);
         }
-      })(),
+      })(config),
   },
   {
     name: "JSON Stringify/Minify",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "JSON Stringify/Minify";
         identifier = "jsonStringify";
@@ -75,43 +72,37 @@ export const transformations: Array<Transformer> = [
             getOrDefault(this.config.padding, 4)
           );
         }
-      })(),
+      })(config),
   },
   {
     name: "Base64 Encode",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "Base64 Encode";
         identifier = "base64Encode";
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
-          return btoa(
-            Array.from(new TextEncoder().encode(input), (byte) =>
-              String.fromCodePoint(byte)
-            ).join("")
-          );
+          return base64Encode(input);
         }
-      })(),
+      })(config),
   },
   {
     name: "Base64 Decode",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "Base64 Decode";
         identifier = "base64Decode";
         input = TransformDataType.STRING;
         output = TransformDataType.STRING;
         transform(input: any) {
-          return new TextDecoder().decode(
-            Uint8Array.from(atob(input), (char) => char.codePointAt(0) || 0)
-          );
+          return base64Decode(input);
         }
-      })(),
+      })(config),
   },
   {
     name: "Stringify number",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "Stringify number";
         identifier = "numberStringify";
@@ -120,11 +111,11 @@ export const transformations: Array<Transformer> = [
         transform(input: any) {
           return String(input);
         }
-      })(),
+      })(config),
   },
   {
     name: "Parse and scale number",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "Parse and scale number";
         identifier = "numberParse";
@@ -155,11 +146,11 @@ export const transformations: Array<Transformer> = [
             getOrDefault(this.config.shift, 0)
           );
         }
-      })(),
+      })(config),
   },
   {
     name: "Replace String (As Is)",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "Replace String (As Is)";
         identifier = "stringReplace";
@@ -185,11 +176,11 @@ export const transformations: Array<Transformer> = [
             getOrDefault(this.config.newString, "")
           );
         }
-      })(),
+      })(config),
   },
   {
     name: "Replace String (RegEx)",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "Replace String (RegEx)";
         identifier = "stringReplace";
@@ -215,11 +206,11 @@ export const transformations: Array<Transformer> = [
             getOrDefault(this.config.newString, "")
           );
         }
-      })(),
+      })(config),
   },
   {
     name: "Modify string",
-    inner: () =>
+    inner: (config?: any) =>
       new (class extends TransformerInnerClass {
         name = "Modify string";
         identifier = "stringManipulate";
@@ -329,6 +320,6 @@ export const transformations: Array<Transformer> = [
           )}${output}${getOrDefault(this.config.suffix, "")}`;
           return output;
         }
-      })(),
+      })(config),
   },
 ];

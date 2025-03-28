@@ -17,14 +17,30 @@ import {
   useClipboard,
 } from "@chakra-ui/react";
 import { MdContentCopy } from "react-icons/md";
+import { base64Encode } from "@/util";
 
-export default function RandomTextPicker() {
-  const [state, setState] = useState<RandomTextPickerState>({
-    texts: ["Heads", "Tails"],
-    current: 0,
-  });
+export default function RandomTextPicker(params: { state: string }) {
+  function getInitialStateOrDefault(
+    initialStateString: string
+  ): RandomTextPickerState {
+    const initialState = JSON.parse(
+      initialStateString
+    ) as RandomTextPickerState;
+    return {
+      ...{
+        texts: ["Heads", "Tails"],
+        current: 0,
+      },
+      ...initialState,
+    };
+  }
+
+  const initialStateObject = getInitialStateOrDefault(params.state);
+  const [state, setState] = useState<RandomTextPickerState>(initialStateObject);
   const [newChoice, setNewChoice] = useState("");
-  const { onCopy, setValue } = useClipboard(state.texts[state.current]);
+  const { onCopy, setValue } = useClipboard(
+    initialStateObject.texts[initialStateObject.current]
+  );
 
   function updateState(stateUpdate: RandomTextPickerStateUpdate) {
     const newState: RandomTextPickerState = { ...state, ...stateUpdate };
@@ -32,6 +48,9 @@ export default function RandomTextPicker() {
     setState(newState);
     if (newState.texts.length > 0) setValue(newState.texts[newState.current]);
     else setValue("");
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set("state", base64Encode(JSON.stringify(newState)));
+    window.history.replaceState(null, "", newUrl);
   }
 
   return (

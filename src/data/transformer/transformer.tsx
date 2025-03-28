@@ -23,30 +23,43 @@ import {
 import { useState } from "react";
 import TransformerLayer from "./transformerLayer";
 import { MdCheck, MdCopyAll } from "react-icons/md";
+import { base64Encode } from "@/util";
 
-export default function Transformer() {
-  const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
-  const [transformers, setTransformers] = useState<
-    Array<TransformerInnerClass>
-  >([]);
-  const { onCopy, setValue, hasCopied } = useClipboard("");
-  const toast = useToast();
+interface TransformerState {
+  input?: string;
+  transformers?: Array<{
+    identifier: string;
+    config: any;
+  }>;
+}
 
-  function addTransformer(transformer: TransformerInnerClass) {
-    setTransformers([...transformers, transformer]);
-    computeOutput(input, [...transformers, transformer]);
+export default function Transformer(params: { state: string }) {
+  function getInitialStateOrDefault(initialStateString: string) {
+    const initialState = JSON.parse(initialStateString) as TransformerState;
+    return {
+      input: initialState.input || "",
+      transformers: initialState.transformers
+        ? initialState.transformers
+            .map((transformer) =>
+              transformations
+                .find(
+                  (transformation) =>
+                    transformation.inner().identifier === transformer.identifier
+                )
+                ?.inner(transformer.config)
+            )
+            .filter((transformer) => transformer !== undefined)
+        : [],
+    };
   }
 
-  function deleteTransformer(index: number) {
-    setTransformers(transformers.toSpliced(index, 1));
-    computeOutput(input, transformers.toSpliced(index, 1));
-  }
+  const initialStateObject = getInitialStateOrDefault(params.state);
 
   function computeOutput(
     input: string,
-    transformers: Array<TransformerInnerClass>
-  ) {
+    transformers: Array<TransformerInnerClass>,
+    initialRun: boolean
+  ): string {
     let output = transformers.reduce((prev, transformer) => {
       try {
         return transformer.transform(prev);
@@ -54,11 +67,63 @@ export default function Transformer() {
         return prev;
       }
     }, input);
-    if (transformers.reverse()[0]?.output == TransformDataType.OBJECT) {
+    if (transformers.toReversed()[0]?.output == TransformDataType.OBJECT) {
       output = JSON.stringify(output, null, 4);
-    } else if (transformers.reverse()[0]?.output == TransformDataType.NUMBER) {
+    } else if (
+      transformers.toReversed()[0]?.output == TransformDataType.NUMBER
+    ) {
       output = Number(output).toLocaleString();
     }
+
+    if (!initialRun) {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set(
+        "state",
+        base64Encode(
+          JSON.stringify({
+            input,
+            transformers: transformers.map((transformer) => ({
+              identifier: transformer.identifier,
+              config: transformer.config,
+            })),
+          })
+        )
+      );
+
+      window.history.replaceState(null, "", newUrl);
+    }
+    return output;
+  }
+
+  const [input, setInput] = useState(initialStateObject.input);
+  const [output, setOutput] = useState(
+    computeOutput(
+      initialStateObject.input,
+      initialStateObject.transformers,
+      true
+    )
+  );
+  const [transformers, setTransformers] = useState<
+    Array<TransformerInnerClass>
+  >(initialStateObject.transformers);
+  const { onCopy, setValue, hasCopied } = useClipboard("");
+  const toast = useToast();
+
+  function addTransformer(transformer: TransformerInnerClass) {
+    setTransformers([...transformers, transformer]);
+    computeAndSetOutput(input, [...transformers, transformer]);
+  }
+
+  function deleteTransformer(index: number) {
+    setTransformers(transformers.toSpliced(index, 1));
+    computeAndSetOutput(input, transformers.toSpliced(index, 1));
+  }
+
+  function computeAndSetOutput(
+    input: string,
+    transformers: Array<TransformerInnerClass>
+  ) {
+    const output = computeOutput(input, transformers, false);
     setOutput(output);
     setValue(output);
   }
@@ -78,7 +143,7 @@ export default function Transformer() {
           resize="none"
           onChange={(e) => {
             setInput(e.target.value);
-            computeOutput(e.target.value, transformers);
+            computeAndSetOutput(e.target.value, transformers);
           }}
           minHeight={"35vh"}
         />
@@ -114,7 +179,7 @@ export default function Transformer() {
           <Button
             onClick={() => {
               setInput("");
-              computeOutput("", transformers);
+              computeAndSetOutput("", transformers);
               toast({
                 title: "Input cleared",
               });
@@ -127,7 +192,7 @@ export default function Transformer() {
             onClick={() => {
               setInput("");
               setTransformers([]);
-              computeOutput("", []);
+              computeAndSetOutput("", []);
               toast({
                 title: "Transformer reset",
               });
@@ -168,7 +233,7 @@ export default function Transformer() {
             key={index}
             transformer={transformer}
             deleteFunction={() => deleteTransformer(index)}
-            updateFunction={() => computeOutput(input, transformers)}
+            updateFunction={() => computeAndSetOutput(input, transformers)}
           />
         ))}
       </Flex>

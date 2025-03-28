@@ -22,16 +22,34 @@ import {
   useClipboard,
 } from "@chakra-ui/react";
 import { MdContentCopy } from "react-icons/md";
+import { base64Encode } from "@/util";
 
-export default function Number() {
-  const [state, setState] = useState<RandomNumberGeneratorState>({
-    min: 1,
-    max: 6,
-    current: 1,
-    prefix: "",
-    suffix: "",
-  });
-  const { onCopy, setValue } = useClipboard(state.current.toString());
+export default function Number(params: { state: string }) {
+  function getInitialStateOrDefault(
+    initialStateString: string
+  ): RandomNumberGeneratorState {
+    const initialState = JSON.parse(
+      initialStateString
+    ) as RandomNumberGeneratorState;
+    return {
+      ...{
+        min: 1,
+        max: 6,
+        current: 1,
+        prefix: "",
+        suffix: "",
+      },
+      ...initialState,
+    };
+  }
+
+  const initialStateObject = getInitialStateOrDefault(params.state);
+
+  const [state, setState] =
+    useState<RandomNumberGeneratorState>(initialStateObject);
+  const { onCopy, setValue } = useClipboard(
+    initialStateObject.current.toString()
+  );
 
   function updateState(stateUpdate: RandomNumberGeneratorStateUpdate) {
     const newState: RandomNumberGeneratorState = { ...state, ...stateUpdate };
@@ -41,6 +59,9 @@ export default function Number() {
     setValue(
       `${newState.prefix}${newState.current.toString()}${newState.suffix}`
     );
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set("state", base64Encode(JSON.stringify(newState)));
+    window.history.replaceState(null, "", newUrl);
   }
 
   return (
