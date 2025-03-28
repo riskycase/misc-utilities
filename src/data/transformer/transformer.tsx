@@ -106,7 +106,11 @@ export default function Transformer(params: { state: string }) {
   const [transformers, setTransformers] = useState<
     Array<TransformerInnerClass>
   >(initialStateObject.transformers);
-  const { onCopy, setValue, hasCopied } = useClipboard("");
+  const { onCopy, setValue, hasCopied } = useClipboard(computeOutput(
+    initialStateObject.input,
+    initialStateObject.transformers,
+    true
+  ));
   const toast = useToast();
 
   function addTransformer(transformer: TransformerInnerClass) {
