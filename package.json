@@ -10,12 +10,12 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@chakra-ui/next-js": "^2.2.0",
-    "@chakra-ui/react": "^2.8.2",
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
+    "@chakra-ui/next-js": "^2.4.2",
+    "@chakra-ui/react": "^2.10.9",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "dayjs": "^1.11.13",
-    "framer-motion": "^11.3.30",
+    "framer-motion": "^11.18.2",
     "hash-wasm": "^4.11.0",
     "next": "14.2.14",
     "react": "^18",
